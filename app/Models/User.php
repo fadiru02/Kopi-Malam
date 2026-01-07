@@ -11,7 +11,6 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements FilamentUser
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
@@ -23,6 +22,7 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -50,7 +50,14 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        // Izinkan login ke panel admin jika emailnya berakhiran @admin.com
-        return str_ends_with($this->email, '@admin.com');
+        if ($panel->getId() === 'admin') {
+            return $this->role === 'owner';
+        }
+
+        if ($panel->getId() === 'employee') {
+            return $this->role === 'employee' || $this->role === 'owner';
+        }
+
+        return false;
     }
 }

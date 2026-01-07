@@ -27,17 +27,19 @@ Route::post('/login', function (Request $request) {
 
     if (Auth::attempt($credentials, $request->remember)) {
         $request->session()->regenerate();
-        
-        // Logika Redirect: Jika email mengandung @admin.com, masuk ke Filament
-        if (str_ends_with(Auth::user()->email, '@admin.com')) {
-            return redirect()->intended('/admin');
-        }
-        return redirect()->intended('/');
+
+        $user = Auth::user();
+
+        // Redirect Otomatis Berdasarkan Role
+        return match ($user->role) {
+            'owner' => redirect()->intended('/admin'),
+            'employee' => redirect()->intended('/employee'),
+            'customer' => redirect()->intended('/'),
+            default => redirect('/'),
+        };
     }
 
-    return back()->withErrors([
-        'email' => 'Email atau password yang Anda masukkan salah.',
-    ])->onlyInput('email');
+    return back()->withErrors(['email' => 'Kredensial tidak cocok.']);
 });
 
 // --- HALAMAN REGISTER ---
@@ -59,11 +61,15 @@ Route::post('/register', function (Request $request) {
         'name' => $data['name'],
         'email' => $data['email'],
         'password' => Hash::make($data['password']),
+        'role' => 'customer', // Pastikan role diisi eksplisit jika tidak ada default di database
     ]);
 
     Auth::login($user);
 
-    return redirect('/');
+    // Jangan langsung ke '/', pastikan session tersimpan
+    $request->session()->regenerate();
+
+    return redirect()->intended('/');
 });
 
 // --- LOGOUT ---
