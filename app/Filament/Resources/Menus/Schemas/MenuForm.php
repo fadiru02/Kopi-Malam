@@ -37,6 +37,7 @@ class MenuForm
                 FileUpload::make('image')
                     ->label('gambar')
                     ->image()
+                    ->disk('public')
                     ->Directory('produk-kopi'),
                 Textarea::make('deskripsi')
                     ->label('deskripsi')

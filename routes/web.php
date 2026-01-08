@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use App\Models\Menu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -61,12 +62,12 @@ Route::post('/register', function (Request $request) {
         'name' => $data['name'],
         'email' => $data['email'],
         'password' => Hash::make($data['password']),
-        'role' => 'customer', // Pastikan role diisi eksplisit jika tidak ada default di database
+        'role' => 'customer', 
     ]);
 
     Auth::login($user);
 
-    // Jangan langsung ke '/', pastikan session tersimpan
+    
     $request->session()->regenerate();
 
     return redirect()->intended('/');
@@ -79,3 +80,11 @@ Route::post('/logout', function (Request $request) {
     $request->session()->regenerateToken();
     return redirect('/');
 })->name('logout');
+
+//MENU KOPI
+Route::get('/menu', function () {
+    // Kita ambil semua menu yang aktif, diurutkan dari yang terbaru
+    $menus = Menu::where('is_active', true)->latest()->get();
+    
+    return view('menu', compact('menus'));
+})->name('menu.index');

@@ -9,5 +9,5 @@ use Illuminate\Database\Eloquent\Model;
 class menu extends Model
 {
     use HasFactory;
-    protected $guarded = [];
+    protected $fillable = ['nama', 'slug', 'type', 'harga', 'image', 'deskripsi', 'is_active'];
 }
